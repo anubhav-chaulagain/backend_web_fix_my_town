@@ -3,7 +3,6 @@ import bodyParser from "body-parser";
 import { connectDatabase } from "./database/mongodb";
 import { PORT } from "./config";
 
-//
 import dotenv from "dotenv";
 dotenv.config();
 
