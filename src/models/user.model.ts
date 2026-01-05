@@ -9,8 +9,8 @@ const UserSchema: Schema = new Schema<UserType>(
         number: {type: String, unique: true},
         role: {
             type: String,
-            enum: ['user', 'admin'],
-            default: 'user'
+            enum: ['citizen', 'authority'],
+            default: 'citizen'
         },
     },
     {

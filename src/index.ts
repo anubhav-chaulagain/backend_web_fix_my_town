@@ -6,10 +6,14 @@ import { PORT } from "./config";
 import dotenv from "dotenv";
 dotenv.config();
 
+import authRoutes from "./routes/auth.route";
+
 const app: Application = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use("/api/auth", authRoutes);
 
 async function startServer() {
     await connectDatabase();
