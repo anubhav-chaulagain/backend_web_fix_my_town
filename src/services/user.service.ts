@@ -15,10 +15,10 @@ export class UserService {
       throw new Error("Email already in use");
     }
 
-    const numberCheck = await userRepository.getUserByNumber(data.number);
-    if (numberCheck) {
-      throw new Error("Number already in use");
-    }
+    // const numberCheck = await userRepository.getUserByNumber(data.number);
+    // if (numberCheck) {
+    //   throw new Error("Number already in use");
+    // }
     // hash password
     const hashedPassword = await bcryptjs.hash(data.password, 10); // 10 complexity
     data.password = hashedPassword;
@@ -44,7 +44,6 @@ export class UserService {
       id: user._id,
       email: user.email,
       fullname: user.fullname,
-      number: user.number,
       role: user.role
     }
 
