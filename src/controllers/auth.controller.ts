@@ -2,6 +2,7 @@ import { UserService } from "../services/user.service";
 import { CreateUserDTO, LoginUserDTO, UpdateUserDTO } from "../dtos/user.dto";
 import { Request, Response } from "express";
 import z from "zod"
+import { IUser } from "../models/user.model";
 
 let userService = new UserService();
 
@@ -48,7 +49,7 @@ export class AuthController {
 
     async getUserByEmail(req: Request, res: Response) {
         try {
-            const userId = req.user?._id;
+            const userId = (req.user as IUser)?.email;
             if (!userId) {
                 return res.status(400).json(
                     { success: false, message: "User ID not provided" }

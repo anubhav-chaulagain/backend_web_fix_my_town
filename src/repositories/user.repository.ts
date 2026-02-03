@@ -36,10 +36,10 @@ export class UserRepository implements IUserRepository {
         return users;
     }
     
-    async updateUser(id: string, updateData: Partial<IUser>): Promise<IUser | null> {
+    async updateUser(email: string, updateData: Partial<IUser>): Promise<IUser | null> {
         // UserModel.updateOne({ _id: id }, { $set: updateData });
-        const updatedUser = await UserModel.findByIdAndUpdate(
-            id, updateData, { new: true } // return the updated document
+        const updatedUser = await UserModel.findOneAndUpdate(
+            { email: email }, updateData, { new: true } // return the updated document
         );
         return updatedUser;
     }

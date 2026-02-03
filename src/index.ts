@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import authRoutes from "./routes/auth.route";
+import adminUserRoutes from "./routes/admin/user.route";
 
 const app: Application = express();
 
@@ -14,6 +15,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/api/auth", authRoutes);
+app.use('/api/admin/users', adminUserRoutes);
 
 async function startServer() {
     await connectDatabase();
