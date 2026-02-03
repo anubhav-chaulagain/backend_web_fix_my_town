@@ -6,7 +6,7 @@ let adminUserService = new AdminUserService();
 export class AdminUserController {
         async createUser(req: Request, res: Response, next: NextFunction) {
             console.log("Body:", req.body);
-        console.log("File:", req.file);
+            console.log("File:", req.file);
         try {
             const parsedData = AdminCreateUserDTO.safeParse(req.body);
             if (!parsedData.success) {
