@@ -4,6 +4,7 @@ import { UserRepository } from "../repositories/user.repository";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config";
+import { Types } from "mongoose";
 
 let userRepository = new UserRepository();
 
@@ -15,10 +16,10 @@ export class UserService {
       throw new Error("Email already in use");
     }
 
-    const numberCheck = await userRepository.getUserByNumber(data.number);
-    if (numberCheck) {
-      throw new Error("Number already in use");
-    }
+    // const numberCheck = await userRepository.getUserByNumber(data.number);
+    // if (numberCheck) {
+    //   throw new Error("Number already in use");
+    // }
     // hash password
     const hashedPassword = await bcryptjs.hash(data.password, 10); // 10 complexity
     data.password = hashedPassword;
@@ -44,11 +45,15 @@ export class UserService {
       id: user._id,
       email: user.email,
       fullname: user.fullname,
-      number: user.number,
       role: user.role
     }
 
     const token = jwt.sign(payload, JWT_SECRET, {expiresIn: '30d'});
     return { token, user }
+  }
+
+  async getUserbyEmail(email: string) {
+    const user = await userRepository.getUserbyEmail(email);
+    return user;
   }
 }
