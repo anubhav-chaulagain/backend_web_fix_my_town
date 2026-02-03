@@ -8,9 +8,9 @@ const UserSchema: Schema = new Schema<UserType>(
         password: {type: String, required: true},
         role: {
             type: String,
-            enum: ['citizen', 'authority'],
             default: 'citizen'
         },
+        profilePicture: {type: String, required: false},
     },
     {
         timestamps: true, // auto createdAt and updatedAt

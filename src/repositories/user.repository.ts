@@ -7,7 +7,6 @@ export interface IUserRepository {
     // Additional
     getUserbyId(id: string): Promise<IUser | null>;
     getAllUsers(): Promise<IUser[]>;
-    updateUser(id: string, updateData: Partial<IUser>): Promise<IUser | null>;
     deleteUser(id:string): Promise<boolean>;
 };
 
@@ -30,17 +29,17 @@ export class UserRepository implements IUserRepository {
         const user = await UserModel.findById(id);
         return user;
     }
+
+    async getUserbyEmail(email: string): Promise<IUser | null> {
+        const user = await UserModel.findOne({ email: email });
+        return user;
+    }
+
     async getAllUsers(): Promise<IUser[]> {
         const users = await UserModel.find();
         return users;
     }
-    async updateUser(id: string, updateData: Partial<IUser>): Promise<IUser | null> {
-        //UserModel.updateOne({_id: id}, {$set: updateData});
-        const updatedUser = await UserModel.findByIdAndUpdate(
-            id, updateData, { new: true } // return the updated document
-        );
-        return updatedUser;
-    }
+
     async deleteUser(id: string): Promise<boolean> {
         // UserModel.deleteONe({ _id: id});
         const result  = await UserModel.findByIdAndDelete(id);

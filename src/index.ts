@@ -9,6 +9,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import authRoutes from "./routes/auth.route";
+import path from 'path';
 
 const app: Application = express();
 
@@ -23,6 +24,7 @@ app.use(cors(corsOptions)); // implement cors middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use('/public', express.static(path.join(__dirname, '../public')));
 app.use("/api/auth", authRoutes);
 
 async function startServer() {

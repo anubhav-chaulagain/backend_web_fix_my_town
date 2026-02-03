@@ -22,3 +22,4 @@ export const LoginUserDTO = UserSchema.pick(
 );
 
 export type LoginUserDTO = z.infer<typeof LoginUserDTO>;
+

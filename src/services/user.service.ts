@@ -4,6 +4,7 @@ import { UserRepository } from "../repositories/user.repository";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config";
+import { Types } from "mongoose";
 
 let userRepository = new UserRepository();
 
@@ -49,5 +50,10 @@ export class UserService {
 
     const token = jwt.sign(payload, JWT_SECRET, {expiresIn: '30d'});
     return { token, user }
+  }
+
+  async getUserbyEmail(email: string) {
+    const user = await userRepository.getUserbyEmail(email);
+    return user;
   }
 }

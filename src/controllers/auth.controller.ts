@@ -2,11 +2,14 @@ import { UserService } from "../services/user.service";
 import { CreateUserDTO, LoginUserDTO } from "../dtos/user.dto";
 import { Request, Response } from "express";
 import z from "zod"
+import { NextFunction } from "express-serve-static-core";
+import bcryptjs from "bcryptjs";
 
 let userService = new UserService();
 
 export class AuthController {
     async register(req: Request, res: Response) {
+        console.log("backend register")
         try {
             const parsedData = CreateUserDTO.safeParse(req.body); // validate request body
             if(!parsedData.success){
