@@ -6,12 +6,11 @@ const UserSchema: Schema = new Schema<UserType>(
         fullname: { type: String, required: true, unique: true},
         email: {type: String, required: true, unique: true},
         password: {type: String, required: true},
-        number: {type: String, unique: true},
         role: {
             type: String,
-            enum: ['citizen', 'authority'],
             default: 'citizen'
         },
+        profilePicture: {type: String, required: false},
     },
     {
         timestamps: true, // auto createdAt and updatedAt
