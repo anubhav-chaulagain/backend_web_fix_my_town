@@ -4,25 +4,28 @@ import z from "zod";
 import { CreateUserDTO, LoginUserDTO } from "../../dtos/user.dto";
 let adminUserService = new AdminUserService();
 export class AdminUserController {
-    async register(req: Request, res: Response) {
-            try {
-                const parsedData = CreateUserDTO.safeParse(req.body); // validate request body
-                if(!parsedData.success){
-                    return res.status(400).json(
-                        {success: false, message: z.prettifyError(parsedData.error)}
-                    )
-                }
-                const userData: CreateUserDTO = parsedData.data;
-                const newUser = await adminUserService.createUser(userData);
-                return res.status(201).json(
-                    {success: true, message: "User Created", data: newUser}
-                );
-            } catch (error: Error | any) { // exception handling
-                return res.status(error.statusCode ?? 500).json(
-                    {success: false, message: error.message || "Internal Server Error"}
-                );
+    async createUser(req: Request, res: Response, next: NextFunction) {
+        try {
+            const parsedData = CreateUserDTO.safeParse(req.body); // validate request body
+            if (!parsedData.success) { // validation failed
+                return res.status(400).json(
+                    { success: false, message: z.prettifyError(parsedData.error) }
+                )
             }
+            if(req.file){   
+                parsedData.data.profileImage = `/uploads/${req.file.filename}`;
+            }
+            const userData: CreateUserDTO = parsedData.data;
+            const newUser = await adminUserService.createUser(userData);
+            return res.status(201).json(
+                { success: true, message: "User Created", data: newUser }
+            );
+        } catch (error: Error | any) {
+            return res.status(error.statusCode ?? 500).json(
+                { success: false, message: error.message || "Internal Server Error" }
+            );
         }
+    }
     
         async login(req: Request, res: Response) {
             try {
