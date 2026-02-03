@@ -8,7 +8,6 @@ export const CreateUserDTO = UserSchema.pick(
     fullname:true,
     email: true,
     password: true,
-    number: true,
     role: true
   }
 );
@@ -23,3 +22,4 @@ export const LoginUserDTO = UserSchema.pick(
 );
 
 export type LoginUserDTO = z.infer<typeof LoginUserDTO>;
+
