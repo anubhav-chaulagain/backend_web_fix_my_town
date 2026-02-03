@@ -8,11 +8,23 @@ export const CreateUserDTO = UserSchema.pick(
     fullname:true,
     email: true,
     password: true,
-    role: true
+    role: true,
   }
 );
 
 export type CreateUserDTO = z.infer<typeof CreateUserDTO>;
+
+export const AdminCreateUserDTO = UserSchema.pick(
+  {
+    fullname:true,
+    email: true,
+    password: true,
+    role: true,
+    profilePicture: true,
+  }
+);
+
+export type AdminCreateUserDTO = z.infer<typeof AdminCreateUserDTO>;
 
 export const LoginUserDTO = UserSchema.pick(
     {
@@ -22,4 +34,7 @@ export const LoginUserDTO = UserSchema.pick(
 );
 
 export type LoginUserDTO = z.infer<typeof LoginUserDTO>;
+
+export const UpdateUserDTO = UserSchema.partial(); // all fields optional for update
+export type UpdateUserDTO = z.infer<typeof UpdateUserDTO>;
 
