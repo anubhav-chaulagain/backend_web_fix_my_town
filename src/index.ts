@@ -2,7 +2,7 @@ import express, { Application } from 'express';
 import bodyParser from "body-parser";
 import { connectDatabase } from "./database/mongodb";
 import { PORT } from "./config";
-
+import path from "path";
 import cors from 'cors';
 
 import dotenv from "dotenv";
