@@ -67,6 +67,45 @@ export class AuthController {
         }
     }
 
+    async requestPasswordReset(req: Request, res: Response) {
+        try {
+            const email = req.body.email;
+            if (!email) {
+                return res.status(400).json(
+                    { success: false, message: "Email is required" }
+                );
+            }
+            const user = await userService.sendResetPasswordEmail(email);
+            return res.status(200).json(
+                {
+                    success: true,
+                    data: user,
+                    message: "Password reset email sent"
+                }
+            );
+        } catch (error: Error | any) {
+            return res.status(error.statusCode ?? 500).json(
+                { success: false, message: error.message || "Internal Server Error" }
+            );
+        }
+    }
+
+    async resetPassword(req: Request, res: Response) {
+        try {
+
+           const token = req.params.token;
+            const { newPassword } = req.body;
+            await userService.resetPassword(token, newPassword);
+            return res.status(200).json(
+                { success: true, message: "Password has been reset successfully." }
+            );
+        } catch (error: Error | any) {
+            return res.status(error.statusCode ?? 500).json(
+                { success: false, message: error.message || "Internal Server Error" }
+            );
+        }
+    }
+
     // async updateUser(req: Request, res: Response) {
     //     try {
     //         const userId = req.user?._id;
@@ -94,4 +133,5 @@ export class AuthController {
     //         );
     //     }
     // }
+
 }
