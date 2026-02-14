@@ -39,7 +39,7 @@ export class AdminUserService {
     }
 
     async deleteUser(id: string){
-        const user = await userRepository.getUserByEmail(id);
+        const user = await userRepository.getUserbyId(id);
         if(!user){
             throw new HttpError(404, "User not found");
         }
@@ -47,12 +47,12 @@ export class AdminUserService {
         return deleted;
     }
 
-    async updateUser(email: string, updateData: UpdateUserDTO){
-        const user = await userRepository.getUserByEmail(email);
+    async updateUser(id: string, updateData: UpdateUserDTO){
+        const user = await userRepository.getUserbyId(id);
         if(!user){
             throw new HttpError(404, "User not found");
         }
-        const updatedUser = await userRepository.updateUser(email, updateData);
+        const updatedUser = await userRepository.updateUser(id, updateData);
         return updatedUser;
     }
 
@@ -63,4 +63,13 @@ export class AdminUserService {
         }
         return user;
     }
+
+    async  getUserById(id: string){
+        const user = await userRepository.getUserbyId(id);
+        if(!user){
+            throw new HttpError(404, "User not found");
+        }
+        return user;
+    }
+
 }

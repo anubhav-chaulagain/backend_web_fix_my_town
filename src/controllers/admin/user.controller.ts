@@ -56,7 +56,7 @@ export class AdminUserController {
 
     async updateUser(req: Request, res: Response, next: NextFunction) {
         try {
-            const userEmail = req.params.email;
+            const userId = req.params.id;
             const parsedData = UpdateUserDTO.safeParse(req.body); // validate request body
             if (!parsedData.success) { // validation failed
                 return res.status(400).json(
@@ -68,7 +68,7 @@ export class AdminUserController {
                 parsedData.data.profilePicture = `/uploads/${req.file.filename}`;
             }
             const updateData: UpdateUserDTO = parsedData.data;
-            const updatedUser = await adminUserService.updateUser(userEmail, updateData);
+            const updatedUser = await adminUserService.updateUser(userId, updateData);
             return res.status(200).json(
                 { success: true, message: "User Updated", data: updatedUser }
             );
@@ -83,12 +83,14 @@ export class AdminUserController {
     async deleteUser(req: Request, res: Response, next: NextFunction) {
         try {
             const userId = req.params.id;
+            
             const deleted = await adminUserService.deleteUser(userId);
             if (!deleted) {
                 return res.status(404).json(
                     { success: false, message: "User not found" }
                 );
             }
+            console.log("User deleted");
             return res.status(200).json(
                 { success: true, message: "User Deleted" }
             );
@@ -112,4 +114,19 @@ export class AdminUserController {
             );
         }
     }
+
+    async getUserById(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.params.id as string;
+            const user = await adminUserService.getUserById(userId);
+            return res.status(200).json(
+                { success: true, data: user, message: "Single User Retrieved" }
+            );
+        } catch (error: Error | any) {
+            return res.status(error.statusCode ?? 500).json(
+                { success: false, message: error.message || "Internal Server Error" }
+            );
+        }
+    }
 }
+

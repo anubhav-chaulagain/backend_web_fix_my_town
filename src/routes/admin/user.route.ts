@@ -13,9 +13,9 @@ router.use(adminMiddleware); // apply all with middleware
 
 router.post("/", uploads.single("profilePicture"), adminUserController.createUser);
 router.get("/", adminUserController.getAllUsers);
-router.put("/:email", uploads.single("profilePicture"), adminUserController.updateUser);
+router.put("/:id", uploads.single("profilePicture"), adminUserController.updateUser);
 router.delete("/:id", adminUserController.deleteUser);
-router.get("/:id", adminUserController.getUserByEmail);
+router.get("/:id", adminUserController.getUserById);
 // define admin user routes
 
 export default router;
