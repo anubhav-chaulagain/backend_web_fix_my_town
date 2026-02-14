@@ -86,7 +86,7 @@ export class UserService {
     if (!user){
       throw new HttpError(404, "User not found");
     }
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, {expiresIn: '1h'});
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
     const resetLink = `${CLIENT_URL}/reset-password?token=${token}`;
     const html = `<p>Click <a href="${resetLink}">here</a> to reset your password. This link will expire in 1 hour.</p>`;
     await sendEmail(user.email, "Password Reset", html);
@@ -105,7 +105,7 @@ export class UserService {
                 throw new HttpError(404, "User not found");
             }
             const hashedPassword = await bcryptjs.hash(newPassword, 10);
-            await userRepository.updateUser(decoded.email, { password: hashedPassword });
+            await userRepository.updateUser(userId, { password: hashedPassword });
             return user;
         } catch (error) {
             throw new HttpError(400, "Invalid or expired token");

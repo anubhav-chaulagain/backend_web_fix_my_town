@@ -1,6 +1,12 @@
 import nodemailer from 'nodemailer';
-const EMAIL_PASS = process.env.EMAIL_PASS as string;
+const EMAIL_PASS = process.env.EMAIL_PASSWORD as string;
 const EMAIL_USER = process.env.EMAIL_USER as string;
+
+// Add validation
+if (!EMAIL_USER || !EMAIL_PASS) {
+    console.error('ERROR: EMAIL_USER and EMAIL_PASS must be set in environment variables');
+    throw new Error('Missing email configuration');
+}
 
 export const trasporter = nodemailer.createTransport({
     service: 'gmail',
