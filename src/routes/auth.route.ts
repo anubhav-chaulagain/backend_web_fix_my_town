@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { AuthController } from "../controllers/auth.controller";
+import { authorizedMiddleware } from "../middlewares/authorized.middleware";
 
 let authController = new AuthController();
 const router = Router();
 
-router.get("/report-stats", authController.getUserReportStats);
+router.get("/report-stats", authorizedMiddleware, authController.getUserReportStats);
 
 router.post("/register", authController.register);
 router.post("/login", authController.login);

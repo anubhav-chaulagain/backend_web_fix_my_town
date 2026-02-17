@@ -31,6 +31,7 @@ export interface IIssueRepository {
     assignIssue(id: string, assignedTo: string, priority?: string): Promise<IIssue | null>;
     resolveIssue(id: string, remarks?: string): Promise<IIssue | null>;
     deleteIssue(id: string): Promise<boolean>;
+    getMyRecentIssues(userId: string): Promise<IIssue[]>;
 }
 
 // MongoDB implementation of IssueRepository
@@ -221,4 +222,13 @@ export class IssueRepository implements IIssueRepository {
         const result = await IssueModel.findByIdAndDelete(id);
         return result ? true : false;
     }
+
+    async getMyRecentIssues(userId: string): Promise<IIssue[]> {
+    const issues = await IssueModel.find({ reportedBy: userId })
+        .populate('reportedBy', 'fullname email')
+        .populate('assignedTo', 'fullname email')
+        .sort({ createdAt: -1 }) // latest first
+        .limit(5);
+    return issues;
+}
 }

@@ -220,4 +220,23 @@ export class IssueController {
             );
         }
     }
+
+    async getMyRecentIssues(req: Request, res: Response) {
+    try {
+        const userId = (req.user as IUser)?._id.toString();
+        if (!userId) {
+            return res.status(401).json(
+                { success: false, message: "User not authenticated" }
+            );
+        }
+        const issues = await issueService.getMyRecentIssues(userId);
+        return res.status(200).json(
+            { success: true, data: issues, message: "Recent issues fetched successfully" }
+        );
+    } catch (error: Error | any) {
+        return res.status(error.statusCode ?? 500).json(
+            { success: false, message: error.message || "Internal Server Error" }
+        );
+    }
+}
 }

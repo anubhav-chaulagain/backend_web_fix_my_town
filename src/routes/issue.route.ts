@@ -13,6 +13,7 @@ router.use(authorizedMiddleware); // apply authentication to all routes
 router.post("/", uploads.array("issueImages", 5), issueController.createIssue);
 router.get("/", issueController.getAllIssues);
 router.get("/my-issues", issueController.getUserIssues);
+router.get("/my-recent", issueController.getMyRecentIssues); // ADD before /:id
 router.get("/:id", issueController.getIssueById);
 router.put("/:id", uploads.array("issueImages", 5), issueController.updateIssue);
 router.delete("/:id", issueController.deleteIssue);

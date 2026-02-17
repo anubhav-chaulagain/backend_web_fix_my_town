@@ -94,6 +94,7 @@ export class UserRepository implements IUserRepository {
             resolvedReports: user?.resolvedReports || 0,
             inprogressReports: user?.inprogressReports || 0
         };
+        
     }
 
     async updateTotalReports(id: string): Promise<void> {

@@ -146,4 +146,9 @@ export class IssueService {
         }
         return { message: "Issue deleted successfully" };
     }
+
+    async getMyRecentIssues(userId: string) {
+        const issues = await issueRepository.getMyRecentIssues(userId); // use repo directly
+        return issues;
+    }
 }
