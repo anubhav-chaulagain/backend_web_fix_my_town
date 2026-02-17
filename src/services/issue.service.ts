@@ -2,8 +2,10 @@ import { CreateIssueDTO, UpdateIssueDTO } from "../dtos/issue.dto";
 import { HttpError } from "../errors/http-error";
 import { IssueRepository } from "../repositories/issue.repository";
 import { Types } from "mongoose";
+import { UserRepository } from "../repositories/user.repository";
 
 let issueRepository = new IssueRepository();
+let userRepository = new UserRepository();
 
 export class IssueService {
     async createIssue(data: CreateIssueDTO, reportedBy: string) {
@@ -12,6 +14,9 @@ export class IssueService {
             reportedBy: new Types.ObjectId(reportedBy)
         };
         const newIssue = await issueRepository.createIssue(issueData);
+        await userRepository.updateTotalReports(reportedBy);
+        await userRepository.updatePendingReports(reportedBy);
+
         return newIssue;
     }
 

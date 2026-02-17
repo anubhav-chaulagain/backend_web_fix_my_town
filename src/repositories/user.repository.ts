@@ -12,6 +12,18 @@ export interface IUserRepository {
     ): Promise<{users: IUser[], total: number}>;
     deleteUser(id:string): Promise<boolean>;
     updateUser(id: string, updateData: Partial<IUser>): Promise<IUser | null>;
+
+    getUserReportStats(id: string): Promise<{
+        totalReports: number;
+        pendingReports: number;
+        resolvedReports: number;
+        inprogressReports: number;
+    }>;
+
+    updateTotalReports(id: string): Promise<void>;
+    updatePendingReports(id: string): Promise<void>;
+    updateResolvedReports(id: string): Promise<void>;
+    updateInProgressReports(id: string): Promise<void>;
 };
 
 // MongoDB implementation of UserRepository
@@ -68,4 +80,35 @@ export class UserRepository implements IUserRepository {
         const result  = await UserModel.findByIdAndDelete(id);
         return result ? true: false;
     }   
+
+    async getUserReportStats(id: string): Promise<{
+        totalReports: number;
+        pendingReports: number;
+        resolvedReports: number;
+        inprogressReports: number;
+    }> {
+        const user = await UserModel.findById(id);
+        return {
+            totalReports: user?.totalReports || 0,
+            pendingReports: user?.pendingReports || 0,
+            resolvedReports: user?.resolvedReports || 0,
+            inprogressReports: user?.inprogressReports || 0
+        };
+    }
+
+    async updateTotalReports(id: string): Promise<void> {
+        await UserModel.findByIdAndUpdate(id, { $inc: { totalReports: 1 } });
+    }
+
+    async updatePendingReports(id: string): Promise<void> {
+        await UserModel.findByIdAndUpdate(id, { $inc: { pendingReports: 1 } });
+    }
+
+    async updateResolvedReports(id: string): Promise<void> {
+        await UserModel.findByIdAndUpdate(id, { $inc: { resolvedReports: 1 } });
+    }
+
+    async updateInProgressReports(id: string): Promise<void> {
+        await UserModel.findByIdAndUpdate(id, { $inc: { inprogressReports: 1 } });
+    }
 };

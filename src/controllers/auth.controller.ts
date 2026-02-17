@@ -105,6 +105,25 @@ export class AuthController {
         }
     }
 
+    async getUserReportStats(req: Request, res: Response) {
+        try {
+            const userId = (req.user as IUser)?._id.toString();
+            if (!userId) {
+                return res.status(400).json(
+                    { success: false, message: "User ID not provided" }
+                );
+            }
+            const stats = await userService.getUserReportStats(userId);
+            return res.status(200).json(
+                { success: true, message: "User report stats fetched successfully", data: stats }
+            );
+        } catch (error: Error | any) {
+            return res.status(error.statusCode ?? 500).json(
+                { success: false, message: error.message || "Internal Server Error" }
+            );
+        }
+    }
+
     // async updateUser(req: Request, res: Response) {
     //     try {
     //         const userId = req.user?._id;

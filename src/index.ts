@@ -28,7 +28,7 @@ app.use(express.urlencoded({ extended: true }));;
 app.use('/public', express.static(path.join(__dirname, '../public')));
 app.use("/api/auth", authRoutes);
 app.use('/api/admin/users', adminUserRoutes);
-app.use("api/issues", issueRoutes);
+app.use("/api/issues", issueRoutes);
 
 async function startServer() {
     await connectDatabase();

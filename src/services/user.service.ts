@@ -111,5 +111,10 @@ export class UserService {
             throw new HttpError(400, "Invalid or expired token");
         }
     }
+
+    async getUserReportStats(id: string) {
+        const stats = await userRepository.getUserReportStats(id);
+        return stats;
+    }
 }
 

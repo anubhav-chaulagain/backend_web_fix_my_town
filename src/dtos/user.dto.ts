@@ -38,3 +38,13 @@ export type LoginUserDTO = z.infer<typeof LoginUserDTO>;
 export const UpdateUserDTO = UserSchema.partial(); // all fields optional for update
 export type UpdateUserDTO = z.infer<typeof UpdateUserDTO>;
 
+export const ReportStatsDTO = UserSchema.pick(
+  {
+    totalReports: true,
+    pendingReports: true,
+    resolvedReports: true,
+    inprogressReports: true,
+  }
+);
+export type ReportStatsDTO = z.infer<typeof ReportStatsDTO>;
+

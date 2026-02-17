@@ -19,14 +19,11 @@ interface QueryParams {
 
 export class IssueController {
     async createIssue(req: Request, res: Response) {
+        console.log("Create Issue Request Body:", req.body);
+        console.log("Create Issue Files:", req.files);
+        
         try {
-            const parsedData = CreateIssueDTO.safeParse(req.body);
-            if (!parsedData.success) {
-                return res.status(400).json(
-                    { success: false, message: z.prettifyError(parsedData.error) }
-                );
-            }
-
+            // Check authentication FIRST
             const userId = (req.user as IUser)?._id.toString();
             if (!userId) {
                 return res.status(401).json(
@@ -34,13 +31,33 @@ export class IssueController {
                 );
             }
 
-            const issueData: CreateIssueDTO = parsedData.data;
+            // Validate request body (without reportedBy - we add it from req.user)
+            const parsedData = CreateIssueDTO.safeParse(req.body);
+            if (!parsedData.success) {
+                return res.status(400).json(
+                    { success: false, message: z.prettifyError(parsedData.error) }
+                );
+            }
+
+            // Handle uploaded files
+            let imageUrls: string[] = [];
+            if (req.files && Array.isArray(req.files)) {
+                imageUrls = req.files.map(file => `/uploads/${file.filename}`);
+            }
+
+            // Combine data with images
+            const issueData = {
+                ...parsedData.data,
+                issueImages: imageUrls.length > 0 ? imageUrls : undefined
+            };
+
             const newIssue = await issueService.createIssue(issueData, userId);
 
             return res.status(201).json(
                 { success: true, message: "Issue reported successfully", data: newIssue }
             );
         } catch (error: Error | any) {
+            console.error("Create Issue Error:", error);
             return res.status(error.statusCode ?? 500).json(
                 { success: false, message: error.message || "Internal Server Error" }
             );

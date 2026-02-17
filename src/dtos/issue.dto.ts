@@ -1,16 +1,15 @@
 import z from "zod";
 import { IssueSchema } from "../types/issue.type";
-// re-use IssueSchema from types
 
-export const CreateIssueDTO = IssueSchema.pick({
-    title: true,
-    category: true,
-    location: true,
-    latitude: true,
-    longitude: true,
-    description: true,
-    issueImages: true,
-    reportedBy: true,
+// Special DTO for creating issues from FormData (accepts string coordinates)
+export const CreateIssueDTO = z.object({
+    title: z.string().min(5, "Title must be at least 5 characters").max(100, "Title must not exceed 100 characters"),
+    category: z.enum(['Pothole', 'Broken Streetlight', 'Garbage', 'Water Leakage', 'Other']),
+    location: z.string().min(5, "Location must be at least 5 characters").max(200, "Location must not exceed 200 characters"),
+    latitude: z.string().optional().transform(val => val ? parseFloat(val) : undefined),
+    longitude: z.string().optional().transform(val => val ? parseFloat(val) : undefined),
+    description: z.string().min(10, "Description must be at least 10 characters").max(1000, "Description must not exceed 1000 characters"),
+    // issueImages will be handled separately in controller from req.files
 });
 
 export type CreateIssueDTO = z.infer<typeof CreateIssueDTO>;
@@ -47,6 +46,7 @@ export const IssueFilterDTO = z.object({
     priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
     reportedBy: z.string().optional(),
     assignedTo: z.string().optional(),
+    search: z.string().optional(),
     page: z.number().int().positive().default(1),
     limit: z.number().int().positive().max(100).default(10),
 });
