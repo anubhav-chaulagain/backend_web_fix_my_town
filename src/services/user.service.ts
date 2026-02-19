@@ -1,4 +1,4 @@
-import { CreateUserDTO, LoginUserDTO, UpdateUserDTO } from "../dtos/user.dto";
+import { CreateAuthorityDTO, CreateUserDTO, LoginUserDTO, UpdateUserDTO } from "../dtos/user.dto";
 import { HttpError } from "../errors/http-error";
 import { UserRepository } from "../repositories/user.repository";
 import bcryptjs from "bcryptjs";
@@ -116,5 +116,53 @@ export class UserService {
         const stats = await userRepository.getUserReportStats(id);
         return stats;
     }
+
+    async getAuthorityStats(id: string) {
+      const user = await userRepository.getUserbyId(id);
+      if (!user) {
+          throw new HttpError(404, "User not found");
+      }
+      if (user.role !== 'authority') {
+          throw new HttpError(403, "Access denied - not an authority user");
+      }
+
+      return {
+          assignedIssues: user.assignedIssuesCount || 0,
+          completedIssues: user.completedIssuesCount || 0,
+          department: user.department,
+          phoneNumber: user.phoneNumber,
+          employeeId: user.employeeId,
+      };
+  }
+
+  async createAuthority(data: CreateAuthorityDTO) {
+    // Check if email already exists
+    const emailCheck = await userRepository.getUserByEmail(data.email);
+    if (emailCheck) {
+        throw new HttpError(400, "Email already in use");
+    }
+
+    // Check if employeeId already exists
+    const employeeIdCheck = await userRepository.getUserByEmployeeId(data.employeeId);
+    if (employeeIdCheck) {
+        throw new HttpError(400, "Employee ID already in use");
+    }
+
+    // Hash password
+    const hashedPassword = await bcryptjs.hash(data.password, 10);
+    
+    // Create authority user with default values
+    const authorityData = {
+        ...data,
+        password: hashedPassword,
+        role: 'authority' as const,
+        assignedIssuesCount: 0,
+        completedIssuesCount: 0,
+        isActive: true,
+    };
+
+    const newAuthority = await userRepository.createUser(authorityData);
+    return newAuthority;
+}
 }
 

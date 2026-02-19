@@ -48,3 +48,24 @@ export const ReportStatsDTO = UserSchema.pick(
 );
 export type ReportStatsDTO = z.infer<typeof ReportStatsDTO>;
 
+export const CreateAuthorityDTO = z.object({
+    fullname: z.string().min(3).max(30),
+    email: z.email().min(5),
+    password: z.string().min(3).max(30),
+    role: z.literal('authority'),
+    department: z.string().min(2, "Department is required"), // Required
+    employeeId: z.string().min(3, "Employee ID is required"), // Required
+    phoneNumber: z.string().min(10, "Phone number is required"), // Required
+});
+
+export type CreateAuthorityDTO = z.infer<typeof CreateAuthorityDTO>;
+
+export const AuthorityStatsDTO = UserSchema.pick({
+    assignedIssuesCount: true,
+    completedIssuesCount: true,
+    department: true,
+    phoneNumber: true,
+    employeeId: true,
+});
+
+export type AuthorityStatsDTO = z.infer<typeof AuthorityStatsDTO>;

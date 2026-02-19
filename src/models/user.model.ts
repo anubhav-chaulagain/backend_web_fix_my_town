@@ -8,17 +8,39 @@ const UserSchema: Schema = new Schema<UserType>(
         password: { type: String, required: true},
         role: {
             type: String,
-            default: 'citizen'
+            default: 'citizen',
+            enum: ['citizen', 'authority']
         },
         profilePicture: { type: String, required: false},
-        // Report Stats
+        
+        // Citizen Stats
         totalReports: { type: Number, default: 0 },
         pendingReports: { type: Number, default: 0 },
         resolvedReports: { type: Number, default: 0 },
         inprogressReports: { type: Number, default: 0 },
+        
+        // Authority-specific fields
+        department: { 
+            type: String, 
+            required: function(this: any): boolean { 
+                return this.role === 'authority'; 
+            }
+        },
+        employeeId: { 
+            type: String, 
+            required: function(this: any): boolean { 
+                return this.role === 'authority'; 
+            },
+            unique: true,
+            sparse: true
+        },
+        assignedIssuesCount: { type: Number, default: 0 },
+        completedIssuesCount: { type: Number, default: 0 },
+        phoneNumber: { type: String },
+        isActive: { type: Boolean, default: true },
     },
     {
-        timestamps: true, // auto createdAt and updatedAt
+        timestamps: true,
     }
 );
 
@@ -29,5 +51,3 @@ export interface IUser extends UserType, Document {
 };
 
 export const UserModel = mongoose.model<IUser>('User', UserSchema);
-// UserModel is the mongoose model for User collection
-// db.users in MongoDB

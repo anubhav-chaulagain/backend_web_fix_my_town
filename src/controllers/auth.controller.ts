@@ -1,5 +1,5 @@
 import { UserService } from "../services/user.service";
-import { CreateUserDTO, LoginUserDTO, UpdateUserDTO } from "../dtos/user.dto";
+import { CreateAuthorityDTO, CreateUserDTO, LoginUserDTO, UpdateUserDTO } from "../dtos/user.dto";
 import { Request, Response } from "express";
 import z from "zod"
 import { IUser } from "../models/user.model";
@@ -121,6 +121,50 @@ export class AuthController {
             return res.status(error.statusCode ?? 500).json(
                 { success: false, message: error.message || "Internal Server Error" }
             );
+        }
+    }
+
+    async getAuthorityStats(req: Request, res: Response) {
+        try {
+            const userId = (req.user as IUser)?._id.toString();
+            if (!userId) {
+                return res.status(401).json({ success: false, message: "Unauthorized" });
+            }
+            
+            const stats = await userService.getAuthorityStats(userId); // Use service instead
+            return res.status(200).json({ success: true, data: stats });
+        } catch (error: Error | any) {
+            return res.status(error.statusCode ?? 500).json({ 
+                success: false, 
+                message: error.message || "Internal Server Error" 
+            });
+        }
+    }
+
+    async registerAuthority(req: Request, res: Response) {
+        console.log("backend register authority");
+        try {
+            const parsedData = CreateAuthorityDTO.safeParse(req.body);
+            if (!parsedData.success) {
+                return res.status(400).json({
+                    success: false,
+                    message: z.prettifyError(parsedData.error)
+                });
+            }
+            
+            const authorityData: CreateAuthorityDTO = parsedData.data;
+            const newAuthority = await userService.createAuthority(authorityData);
+            
+            return res.status(201).json({
+                success: true,
+                message: "Authority user created successfully",
+                data: newAuthority
+            });
+        } catch (error: Error | any) {
+            return res.status(error.statusCode ?? 500).json({
+                success: false,
+                message: error.message || "Internal Server Error"
+            });
         }
     }
 

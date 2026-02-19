@@ -114,26 +114,6 @@ export class IssueService {
         return updatedIssue;
     }
 
-    async assignIssue(id: string, assignedTo: string, priority?: string) {
-        const issue = await issueRepository.getIssueById(id);
-        if (!issue) {
-            throw new HttpError(404, "Issue not found");
-        }
-
-        const updatedIssue = await issueRepository.assignIssue(id, assignedTo, priority);
-        return updatedIssue;
-    }
-
-    async resolveIssue(id: string, remarks?: string) {
-        const issue = await issueRepository.getIssueById(id);
-        if (!issue) {
-            throw new HttpError(404, "Issue not found");
-        }
-
-        const updatedIssue = await issueRepository.resolveIssue(id, remarks);
-        return updatedIssue;
-    }
-
     async deleteIssue(id: string) {
         const issue = await issueRepository.getIssueById(id);
         if (!issue) {
@@ -150,5 +130,37 @@ export class IssueService {
     async getMyRecentIssues(userId: string) {
         const issues = await issueRepository.getMyRecentIssues(userId); // use repo directly
         return issues;
+    }
+
+    async assignIssue(id: string, assignedTo: string, priority?: string) {
+        const issue = await issueRepository.getIssueById(id);
+        if (!issue) {
+            throw new HttpError(404, "Issue not found");
+        }
+
+        const updatedIssue = await issueRepository.assignIssue(id, assignedTo, priority);
+        
+        // Update authority stats
+        await userRepository.incrementAuthorityStats(assignedTo, 'assignedIssuesCount');
+
+        return updatedIssue;
+    }
+
+    async resolveIssue(id: string, remarks?: string) {
+        const issue = await issueRepository.getIssueById(id);
+        if (!issue) {
+            throw new HttpError(404, "Issue not found");
+        }
+
+        const updatedIssue = await issueRepository.resolveIssue(id, remarks);
+        
+        // Update authority stats
+        if (issue.assignedTo) {
+            const authorityId = issue.assignedTo.toString();
+            await userRepository.decrementAuthorityStats(authorityId, 'assignedIssuesCount');
+            await userRepository.incrementAuthorityStats(authorityId, 'completedIssuesCount');
+        }
+
+        return updatedIssue;
     }
 }

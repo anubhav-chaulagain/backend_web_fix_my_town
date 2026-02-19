@@ -7,6 +7,7 @@ export interface IUserRepository {
     // getUserByNumber(number: String): Promise<IUser | null>;
     // Additional
     getUserbyId(id: string): Promise<IUser | null>;
+    getUserByEmployeeId(employeeId: string): Promise<IUser | null>;
     getAllUsers(
         page: number, size: number, search?: string
     ): Promise<{users: IUser[], total: number}>;
@@ -24,6 +25,9 @@ export interface IUserRepository {
     updatePendingReports(id: string): Promise<void>;
     updateResolvedReports(id: string): Promise<void>;
     updateInProgressReports(id: string): Promise<void>;
+
+    incrementAuthorityStats(id: string, field: 'assignedIssuesCount' | 'completedIssuesCount'): Promise<void>;
+    decrementAuthorityStats(id: string, field: 'assignedIssuesCount' | 'completedIssuesCount'): Promise<void>;
 };
 
 // MongoDB implementation of UserRepository
@@ -112,4 +116,24 @@ export class UserRepository implements IUserRepository {
     async updateInProgressReports(id: string): Promise<void> {
         await UserModel.findByIdAndUpdate(id, { $inc: { inprogressReports: 1 } });
     }
+
+    async getUserByEmployeeId(employeeId: string): Promise<IUser | null> {
+        const user = await UserModel.findOne({ employeeId });
+        return user;
+    }
+
+    async incrementAuthorityStats(
+        id: string, 
+        field: 'assignedIssuesCount' | 'completedIssuesCount'
+    ): Promise<void> {
+        await UserModel.findByIdAndUpdate(id, { $inc: { [field]: 1 } });
+    }
+
+    async decrementAuthorityStats(
+        id: string, 
+        field: 'assignedIssuesCount' | 'completedIssuesCount'
+    ): Promise<void> {
+        await UserModel.findByIdAndUpdate(id, { $inc: { [field]: -1 } });
+    }
+
 };

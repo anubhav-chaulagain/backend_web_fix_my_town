@@ -6,14 +6,12 @@ let authController = new AuthController();
 const router = Router();
 
 router.get("/report-stats", authorizedMiddleware, authController.getUserReportStats);
+router.get("/authority-stats", authorizedMiddleware, authController.getAuthorityStats);
 
 router.post("/register", authController.register);
+router.post("/register-authority", authController.registerAuthority);
 router.post("/login", authController.login);
-
-router.post(
-    '/request-password-reset',
-    authController.requestPasswordReset
-)
+router.post('/request-password-reset', authController.requestPasswordReset);
 router.post("/reset-password/:token", authController.resetPassword);
-export default router;
 
+export default router;
