@@ -53,9 +53,10 @@ export const CreateAuthorityDTO = z.object({
     email: z.email().min(5),
     password: z.string().min(3).max(30),
     role: z.literal('authority'),
-    department: z.string().min(2, "Department is required"), // Required
-    employeeId: z.string().min(3, "Employee ID is required"), // Required
-    phoneNumber: z.string().min(10, "Phone number is required"), // Required
+    department: z.string().min(2, "Department is required"),
+    employeeId: z.string().min(3, "Employee ID is required").optional(), // Make optional
+    phoneNumber: z.string().min(10, "Phone number is required"),
+    profilePicture: z.string().optional(),
 });
 
 export type CreateAuthorityDTO = z.infer<typeof CreateAuthorityDTO>;

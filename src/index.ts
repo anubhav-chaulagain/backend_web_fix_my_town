@@ -11,7 +11,6 @@ dotenv.config();
 import authRoutes from "./routes/auth.route";
 import adminUserRoutes from "./routes/admin/user.route";
 import issueRoutes from "./routes/issue.route";
-import crewRoutes from "./routes/crew.route";
 
 const app: Application = express();
 
@@ -31,7 +30,6 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use("/api/auth", authRoutes);
 app.use('/api/admin/users', adminUserRoutes);
 app.use("/api/issues", issueRoutes);
-app.use("/api/crews", crewRoutes);
 
 async function startServer() {
     await connectDatabase();

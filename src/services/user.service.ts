@@ -136,33 +136,55 @@ export class UserService {
   }
 
   async createAuthority(data: CreateAuthorityDTO) {
-    // Check if email already exists
-    const emailCheck = await userRepository.getUserByEmail(data.email);
-    if (emailCheck) {
-        throw new HttpError(400, "Email already in use");
-    }
+      // Check if email already exists
+      const emailCheck = await userRepository.getUserByEmail(data.email);
+      if (emailCheck) {
+          throw new HttpError(400, "Email already in use");
+      }
 
-    // Check if employeeId already exists
-    const employeeIdCheck = await userRepository.getUserByEmployeeId(data.employeeId);
-    if (employeeIdCheck) {
-        throw new HttpError(400, "Employee ID already in use");
-    }
+      // Auto-generate employeeId if not provided
+      let employeeId = data.employeeId;
+      if (!employeeId) {
+          employeeId = await this.generateEmployeeId();
+      } else {
+          // Check if manually entered employeeId already exists (only if provided)
+          const employeeIdCheck = await userRepository.getUserByEmployeeId(employeeId);
+          if (employeeIdCheck) {
+              throw new HttpError(400, "Employee ID already in use");
+          }
+      }
 
-    // Hash password
-    const hashedPassword = await bcryptjs.hash(data.password, 10);
-    
-    // Create authority user with default values
-    const authorityData = {
-        ...data,
-        password: hashedPassword,
-        role: 'authority' as const,
-        assignedIssuesCount: 0,
-        completedIssuesCount: 0,
-        isActive: true,
-    };
+      // Hash password
+      const hashedPassword = await bcryptjs.hash(data.password, 10);
+      
+      // Create authority user with default values
+      const authorityData = {
+          ...data,
+          employeeId, // Use the generated or validated employeeId
+          password: hashedPassword,
+          role: 'authority' as const,
+          assignedIssuesCount: 0,
+          completedIssuesCount: 0,
+          isActive: true,
+      };
 
-    const newAuthority = await userRepository.createUser(authorityData);
-    return newAuthority;
-}
+      const newAuthority = await userRepository.createUser(authorityData);
+      return newAuthority;
+  }
+
+  // Helper method to generate unique employee ID
+  private async generateEmployeeId(): Promise<string> {
+      const year = new Date().getFullYear();
+      let counter = 1;
+      let employeeId = `EMP-${year}-${String(counter).padStart(3, '0')}`;
+
+      // Keep incrementing until we find an unused ID
+      while (await userRepository.getUserByEmployeeId(employeeId)) {
+          counter++;
+          employeeId = `EMP-${year}-${String(counter).padStart(3, '0')}`;
+      }
+
+      return employeeId;
+  }
 }
 

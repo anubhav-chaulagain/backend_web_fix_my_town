@@ -1,40 +1,55 @@
 import { AdminUserService } from "../../services/admin/user.service";
 import { NextFunction, Request, Response } from "express";
 import z from "zod";
-import { AdminCreateUserDTO, CreateUserDTO, LoginUserDTO, UpdateUserDTO } from "../../dtos/user.dto";
+import { AdminCreateUserDTO, CreateAuthorityDTO, CreateUserDTO, LoginUserDTO, UpdateUserDTO } from "../../dtos/user.dto";
 import { QueryParams } from "../../types/query.type";
 
 
 let adminUserService = new AdminUserService();
 export class AdminUserController {
-        async createUser(req: Request, res: Response, next: NextFunction) {
-            console.log("Body:", req.body);
-            console.log("File:", req.file);
+        // In admin/user.controller.ts
+    async createUser(req: Request, res: Response) {
         try {
-            const parsedData = AdminCreateUserDTO.safeParse(req.body);
-            if (!parsedData.success) {
-                return res.status(400).json(
-                    { success: false, message: z.prettifyError(parsedData.error) }
-                )
+            const { role } = req.body;
+
+            // Handle file upload first
+            if (req.file) {
+                req.body.profilePicture = `/uploads/${req.file.filename}`;
             }
 
-            const userData: AdminCreateUserDTO = parsedData.data;
+            // Use appropriate DTO based on role
+            let newUser;
             
-            // Add profilePicture to userData if file exists
-            if (req.file) {   
-                userData.profilePicture = `/uploads/${req.file.filename}`;
+            if (role === 'authority') {
+                const parsedData = CreateAuthorityDTO.safeParse(req.body);
+                if (!parsedData.success) {
+                    return res.status(400).json({
+                        success: false,
+                        message: z.prettifyError(parsedData.error)
+                    });
+                }
+                newUser = await adminUserService.createAuthority(parsedData.data);
+            } else {
+                const parsedData = AdminCreateUserDTO.safeParse(req.body);
+                if (!parsedData.success) {
+                    return res.status(400).json({
+                        success: false,
+                        message: z.prettifyError(parsedData.error)
+                    });
+                }
+                newUser = await adminUserService.createUser(parsedData.data);
             }
-            
-            console.log(userData); // Should now show profilePicture
-            
-            const newUser = await adminUserService.createUser(userData);
-            return res.status(201).json(
-                { success: true, message: "User Created", data: newUser }
-            );
+
+            return res.status(201).json({
+                success: true,
+                message: "User created successfully",
+                data: newUser
+            });
         } catch (error: Error | any) {
-            return res.status(error.statusCode ?? 500).json(
-                { success: false, message: error.message || "Internal Server Error" }
-            );
+            return res.status(error.statusCode ?? 500).json({
+                success: false,
+                message: error.message || "Internal Server Error"
+            });
         }
     }
     
