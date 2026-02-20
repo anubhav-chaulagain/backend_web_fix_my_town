@@ -163,4 +163,35 @@ export class IssueService {
 
         return updatedIssue;
     }
+
+    async getMyAssignedIssues(
+    authorityId: string,
+    page?: string,
+    size?: string,
+    status?: string,
+    category?: string,
+    priority?: string,
+    search?: string
+) {
+    const pageNumber = page ? parseInt(page) : 1;
+    const pageSize = size ? parseInt(size) : 10;
+
+    const filters = { status, category, priority, search };
+
+    const { issues, total } = await issueRepository.getAssignedIssues(
+        authorityId,
+        pageNumber,
+        pageSize,
+        filters
+    );
+
+    const pagination = {
+        page: pageNumber,
+        size: pageSize,
+        totalItems: total,
+        totalPages: Math.ceil(total / pageSize)
+    };
+
+    return { issues, pagination };
+}
 }

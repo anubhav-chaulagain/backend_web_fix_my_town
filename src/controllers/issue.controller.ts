@@ -239,4 +239,40 @@ export class IssueController {
         );
     }
 }
+
+async getMyAssignedIssues(req: Request, res: Response) {
+    try {
+        const authorityId = (req.user as IUser)?._id.toString();
+        if (!authorityId) {
+            return res.status(401).json({
+                success: false,
+                message: "User not authenticated"
+            });
+        }
+
+        const { page, size, status, category, priority, search }: QueryParams = req.query;
+
+        const { issues, pagination } = await issueService.getMyAssignedIssues(
+            authorityId,
+            page,
+            size,
+            status,
+            category,
+            priority,
+            search
+        );
+
+        return res.status(200).json({
+            success: true,
+            data: issues,
+            pagination: pagination,
+            message: "Assigned issues retrieved successfully"
+        });
+    } catch (error: Error | any) {
+        return res.status(error.statusCode ?? 500).json({
+            success: false,
+            message: error.message || "Internal Server Error"
+        });
+    }
+}
 }

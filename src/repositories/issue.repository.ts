@@ -1,4 +1,4 @@
-import { QueryFilter } from "mongoose";
+import mongoose, { QueryFilter } from "mongoose";
 import { IIssue, IssueModel } from "../models/issue.model";
 
 export interface IIssueRepository {
@@ -32,6 +32,18 @@ export interface IIssueRepository {
     resolveIssue(id: string, remarks?: string): Promise<IIssue | null>;
     deleteIssue(id: string): Promise<boolean>;
     getMyRecentIssues(userId: string): Promise<IIssue[]>;
+    getAssignedIssues(
+        authorityId: string,
+        page: number,
+        size: number,
+        filters?: {
+            status?: string;
+            category?: string;
+            priority?: string;
+            search?: string;
+        }
+    ): Promise<{ issues: IIssue[], total: number }>;
+    
 }
 
 // MongoDB implementation of IssueRepository
@@ -230,5 +242,48 @@ export class IssueRepository implements IIssueRepository {
         .sort({ createdAt: -1 }) // latest first
         .limit(5);
     return issues;
+}
+
+async getAssignedIssues(
+    authorityId: string,
+    page: number,
+    size: number,
+    filters?: {
+        status?: string;
+        category?: string;
+        priority?: string;
+        search?: string;
+    }
+): Promise<{ issues: IIssue[], total: number }> {
+    const query: any = { assignedTo: new mongoose.Types.ObjectId(authorityId) };
+
+    if (filters?.status) {
+        query.status = filters.status;
+    }
+    if (filters?.category) {
+        query.category = filters.category;
+    }
+    if (filters?.priority) {
+        query.priority = filters.priority;
+    }
+    if (filters?.search) {
+        query.$or = [
+            { title: { $regex: filters.search, $options: 'i' } },
+            { description: { $regex: filters.search, $options: 'i' } },
+            { location: { $regex: filters.search, $options: 'i' } }
+        ];
+    }
+
+    const [issues, total] = await Promise.all([
+        IssueModel.find(query)
+            .populate('reportedBy', 'fullname email')
+            .populate('assignedTo', 'fullname email')
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * size)
+            .limit(size),
+        IssueModel.countDocuments(query)
+    ]);
+
+    return { issues, total };
 }
 }
