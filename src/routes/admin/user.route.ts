@@ -11,11 +11,14 @@ const router = Router();
 router.use(authorizedMiddleware); // apply all with middleware
 router.use(adminMiddleware); // apply all with middleware
 
-router.post("/", uploads.single("profilePicture"), adminUserController.createUser);
-router.get("/", adminUserController.getAllUsers);
-router.put("/:id", uploads.single("profilePicture"), adminUserController.updateUser);
-router.delete("/:id", adminUserController.deleteUser);
-router.get("/:id", adminUserController.getUserById);
+
+router.post("/users", uploads.single("profilePicture"), adminUserController.createUser);
+router.get("/users", adminUserController.getAllUsers);
+router.get("/stats",      adminUserController.getAdminStats);
+router.get("/authorities", adminUserController.getAuthorityUsers);
+router.put("/users/:id", uploads.single("profilePicture"), adminUserController.updateUser);
+router.delete("/users/:id", adminUserController.deleteUser);
+router.get("/users/:id", adminUserController.getUserById);
 // define admin user routes
 
 export default router;

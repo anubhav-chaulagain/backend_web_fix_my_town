@@ -15,6 +15,7 @@ router.get("/", issueController.getAllIssues);
 router.get("/my-issues", issueController.getUserIssues);
 router.get("/my-recent", issueController.getMyRecentIssues);
 router.get("/my-assigned", issueController.getMyAssignedIssues);
+router.get("/unassigned", issueController.getUnassignedIssues); 
 router.get("/:id", issueController.getIssueById);
 router.put("/:id", uploads.array("issueImages", 5), issueController.updateIssue);
 router.delete("/:id", issueController.deleteIssue);

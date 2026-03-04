@@ -169,7 +169,7 @@ export class IssueController {
     async assignIssue(req: Request, res: Response) {
         try {
             const issueId = req.params.id;
-            const { assignedTo, priority } = req.body;
+            const { assignedTo} = req.body;
 
             if (!assignedTo) {
                 return res.status(400).json(
@@ -177,7 +177,7 @@ export class IssueController {
                 );
             }
 
-            const updatedIssue = await issueService.assignIssue(issueId, assignedTo, priority);
+            const updatedIssue = await issueService.assignIssue(issueId, assignedTo);
 
             return res.status(200).json(
                 { success: true, message: "Issue assigned successfully", data: updatedIssue }
@@ -267,6 +267,23 @@ async getMyAssignedIssues(req: Request, res: Response) {
             data: issues,
             pagination: pagination,
             message: "Assigned issues retrieved successfully"
+        });
+    } catch (error: Error | any) {
+        return res.status(error.statusCode ?? 500).json({
+            success: false,
+            message: error.message || "Internal Server Error"
+        });
+    }
+}
+
+async getUnassignedIssues(req: Request, res: Response) {
+    try {
+        const limit = req.query.limit ? parseInt(req.query.limit as string) : 5;
+        const issues = await issueService.getUnassignedIssues(limit);
+        return res.status(200).json({
+            success: true,
+            data: issues,
+            message: "Unassigned issues fetched successfully"
         });
     } catch (error: Error | any) {
         return res.status(error.statusCode ?? 500).json({

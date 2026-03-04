@@ -143,5 +143,36 @@ export class AdminUserController {
             );
         }
     }
+
+    async getAuthorityUsers(req: Request, res: Response) {
+        try {
+            const users = await adminUserService.getUsersByRole('authority');
+            return res.status(200).json({
+                success: true,
+                data: users,
+                message: "Authority users fetched successfully"
+            });
+        } catch (error: Error | any) {
+            return res.status(error.statusCode ?? 500).json({
+                success: false,
+                message: error.message || "Internal Server Error"
+            });
+        }
+    }
+    async getAdminStats(req: Request, res: Response) {
+        try {
+            const stats = await adminUserService.getAdminStats();
+            return res.status(200).json({
+                success: true,
+                data: stats,
+                message: "Admin stats fetched successfully"
+            });
+        } catch (error: Error | any) {
+            return res.status(error.statusCode ?? 500).json({
+                success: false,
+                message: error.message || "Internal Server Error"
+            });
+        }
+    }
 }
 

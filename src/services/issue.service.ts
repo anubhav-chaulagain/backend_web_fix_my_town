@@ -86,6 +86,11 @@ export class IssueService {
         return { issues, pagination };
     }
 
+    async getUnassignedIssues(limit = 5) {
+        const issues = await issueRepository.getUnassignedIssues(limit);
+        return issues;
+    }
+
     async updateIssue(id: string, data: UpdateIssueDTO) {
         const issue = await issueRepository.getIssueById(id);
         if (!issue) {
@@ -132,13 +137,13 @@ export class IssueService {
         return issues;
     }
 
-    async assignIssue(id: string, assignedTo: string, priority?: string) {
+    async assignIssue(id: string, assignedTo: string) {
         const issue = await issueRepository.getIssueById(id);
         if (!issue) {
             throw new HttpError(404, "Issue not found");
         }
 
-        const updatedIssue = await issueRepository.assignIssue(id, assignedTo, priority);
+        const updatedIssue = await issueRepository.assignIssue(id, assignedTo);
         
         // Update authority stats
         await userRepository.incrementAuthorityStats(assignedTo, 'assignedIssuesCount');

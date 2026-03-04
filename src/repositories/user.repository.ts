@@ -11,6 +11,7 @@ export interface IUserRepository {
     getAllUsers(
         page: number, size: number, search?: string
     ): Promise<{users: IUser[], total: number}>;
+    getUsersByRole(role: string): Promise<IUser[]>;
     deleteUser(id:string): Promise<boolean>;
     updateUser(id: string, updateData: Partial<IUser>): Promise<IUser | null>;
 
@@ -134,6 +135,10 @@ export class UserRepository implements IUserRepository {
         field: 'assignedIssuesCount' | 'completedIssuesCount'
     ): Promise<void> {
         await UserModel.findByIdAndUpdate(id, { $inc: { [field]: -1 } });
+    }
+
+    async getUsersByRole(role: string): Promise<IUser[]> {
+        return await UserModel.find({ role }).sort({ fullname: 1 });
     }
 
 };

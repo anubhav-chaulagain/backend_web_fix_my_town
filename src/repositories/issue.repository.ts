@@ -26,9 +26,10 @@ export interface IIssueRepository {
         page: number,
         size: number
     ): Promise<{ issues: IIssue[], total: number }>;
+    getUnassignedIssues(limit: number): Promise<IIssue[]>;
     updateIssue(id: string, updateData: Partial<IIssue>): Promise<IIssue | null>;
     updateIssueStatus(id: string, status: string, remarks?: string): Promise<IIssue | null>;
-    assignIssue(id: string, assignedTo: string, priority?: string): Promise<IIssue | null>;
+    assignIssue(id: string, assignedTo: string): Promise<IIssue | null>;
     resolveIssue(id: string, remarks?: string): Promise<IIssue | null>;
     deleteIssue(id: string): Promise<boolean>;
     getMyRecentIssues(userId: string): Promise<IIssue[]>;
@@ -43,7 +44,13 @@ export interface IIssueRepository {
             search?: string;
         }
     ): Promise<{ issues: IIssue[], total: number }>;
-    
+    getAdminStats(): Promise<{
+        totalReports: number;
+        unassignedReports: number;
+        pendingReports: number;
+        inprogressReports: number;
+        resolvedReports: number;
+    }>;
 }
 
 // MongoDB implementation of IssueRepository
@@ -152,6 +159,17 @@ export class IssueRepository implements IIssueRepository {
         return { issues, total };
     }
 
+    async getUnassignedIssues(limit: number): Promise<IIssue[]> {
+        const issues = await IssueModel.find({
+            assignedTo: { $exists: false },   // covers documents where field is absent
+            // status: 'pending'
+        })
+            .populate('reportedBy', 'fullname email')
+            .sort({ createdAt: -1 })
+            .limit(limit);
+        return issues;
+    }
+
     async updateIssue(id: string, updateData: Partial<IIssue>): Promise<IIssue | null> {
         const updatedIssue = await IssueModel.findByIdAndUpdate(
             id, 
@@ -188,15 +206,11 @@ export class IssueRepository implements IIssueRepository {
         return updatedIssue;
     }
 
-    async assignIssue(id: string, assignedTo: string, priority?: string): Promise<IIssue | null> {
+    async assignIssue(id: string, assignedTo: string): Promise<IIssue | null> {
         const updateData: Partial<IIssue> = { 
             assignedTo: assignedTo as any,
             status: 'in-progress' as any
         };
-
-        if (priority) {
-            updateData.priority = priority as any;
-        }
 
         const updatedIssue = await IssueModel.findByIdAndUpdate(
             id,
@@ -285,5 +299,29 @@ async getAssignedIssues(
     ]);
 
     return { issues, total };
+}
+
+async getAdminStats() {
+    const [
+        totalReports,
+        unassignedReports,
+        pendingReports,
+        inprogressReports,
+        resolvedReports,
+    ] = await Promise.all([
+        IssueModel.countDocuments({}),
+        IssueModel.countDocuments({ assignedTo: { $exists: false } }),
+        IssueModel.countDocuments({ status: 'pending' }),
+        IssueModel.countDocuments({ status: 'in-progress' }),
+        IssueModel.countDocuments({ status: 'resolved' }),
+    ]);
+
+    return {
+        totalReports,
+        unassignedReports,
+        pendingReports,
+        inprogressReports,
+        resolvedReports,
+    };
 }
 }

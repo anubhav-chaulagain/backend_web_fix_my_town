@@ -4,8 +4,10 @@ import { HttpError } from "../../errors/http-error";
 import { UserRepository } from "../../repositories/user.repository";
 import { JWT_SECRET } from "../../config";
 import bcrypt from "bcryptjs";
+import { IssueRepository } from "../../repositories/issue.repository";
 
 let userRepository = new UserRepository();
+let issueRepository = new IssueRepository();
 
 export class AdminUserService {
     async createUser(data: AdminCreateUserDTO){
@@ -123,6 +125,15 @@ export class AdminUserService {
             throw new HttpError(404, "User not found");
         }
         return user;
+    }
+
+    async getUsersByRole(role: string) {
+        const users = await userRepository.getUsersByRole(role);
+        return users;
+    }
+
+    async getAdminStats() {
+        return await issueRepository.getAdminStats();
     }
 
 }
