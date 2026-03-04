@@ -27,6 +27,9 @@ export interface IUserRepository {
     updateResolvedReports(id: string): Promise<void>;
     updateInProgressReports(id: string): Promise<void>;
 
+    decrementPendingReports(id: string): Promise<void>;
+    decrementInProgressReports(id: string): Promise<void>;
+
     incrementAuthorityStats(id: string, field: 'assignedIssuesCount' | 'completedIssuesCount'): Promise<void>;
     decrementAuthorityStats(id: string, field: 'assignedIssuesCount' | 'completedIssuesCount'): Promise<void>;
 };
@@ -139,6 +142,14 @@ export class UserRepository implements IUserRepository {
 
     async getUsersByRole(role: string): Promise<IUser[]> {
         return await UserModel.find({ role }).sort({ fullname: 1 });
+    }
+
+    async decrementPendingReports(id: string): Promise<void> {
+        await UserModel.findByIdAndUpdate(id, { $inc: { pendingReports: -1 } });
+    }
+
+    async decrementInProgressReports(id: string): Promise<void> {
+        await UserModel.findByIdAndUpdate(id, { $inc: { inprogressReports: -1 } });
     }
 
 };

@@ -137,16 +137,23 @@ export class IssueService {
         return issues;
     }
 
-    async assignIssue(id: string, assignedTo: string) {
+    async assignIssue(id: string, assignedTo: string, priority?: string) {
         const issue = await issueRepository.getIssueById(id);
         if (!issue) {
             throw new HttpError(404, "Issue not found");
         }
 
         const updatedIssue = await issueRepository.assignIssue(id, assignedTo);
-        
-        // Update authority stats
+
         await userRepository.incrementAuthorityStats(assignedTo, 'assignedIssuesCount');
+
+        const reporterId = (issue.reportedBy as any)?._id
+            ? (issue.reportedBy as any)._id.toString()
+            : issue.reportedBy?.toString();
+
+        if (reporterId) {
+            await userRepository.updateInProgressReports(reporterId);
+        }
 
         return updatedIssue;
     }
@@ -158,10 +165,21 @@ export class IssueService {
         }
 
         const updatedIssue = await issueRepository.resolveIssue(id, remarks);
-        
-        // Update authority stats
-        if (issue.assignedTo) {
-            const authorityId = issue.assignedTo.toString();
+
+        const reporterId = (issue.reportedBy as any)?._id
+            ? (issue.reportedBy as any)._id.toString()
+            : issue.reportedBy?.toString();
+
+        const authorityId = (issue.assignedTo as any)?._id
+            ? (issue.assignedTo as any)._id.toString()
+            : issue.assignedTo?.toString();
+
+        if (reporterId) {
+            await userRepository.updateResolvedReports(reporterId);
+            await userRepository.decrementInProgressReports(reporterId);  // ← new
+        }
+
+        if (authorityId) {
             await userRepository.decrementAuthorityStats(authorityId, 'assignedIssuesCount');
             await userRepository.incrementAuthorityStats(authorityId, 'completedIssuesCount');
         }
