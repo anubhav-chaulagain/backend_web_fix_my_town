@@ -6,6 +6,9 @@ import jwt from "jsonwebtoken";
 import { CLIENT_URL, JWT_SECRET } from "../config";
 import { Types } from "mongoose";
 import { sendEmail } from "../config/email";
+import { IUser } from "../models/user.model";
+import path from "path";
+import fs from "fs";
 
 let userRepository = new UserRepository();
 
@@ -186,5 +189,23 @@ export class UserService {
 
       return employeeId;
   }
+
+    async updateProfile(userId: string, updateData: Partial<IUser>) {
+        const user = await userRepository.getUserbyId(userId);
+        if (!user) {
+            throw new HttpError(404, "User not found");
+        }
+
+        // Delete old profile picture file if replacing or removing
+        if ((updateData.profilePicture !== undefined) && user.profilePicture) {
+            const oldFilePath = path.join(__dirname, '../../uploads', user.profilePicture);
+            if (fs.existsSync(oldFilePath)) {
+                fs.unlinkSync(oldFilePath); // clean up old file from disk
+            }
+        }
+
+        const updatedUser = await userRepository.updateUser(userId, updateData);
+        return updatedUser;
+    }
 }
 

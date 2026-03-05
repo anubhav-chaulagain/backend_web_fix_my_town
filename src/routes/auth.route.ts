@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { AuthController } from "../controllers/auth.controller";
 import { authorizedMiddleware } from "../middlewares/authorized.middleware";
+import { uploads } from "../middlewares/upload.middleware";
 
 let authController = new AuthController();
 const router = Router();
@@ -13,5 +14,6 @@ router.post("/register-authority", authController.registerAuthority);
 router.post("/login", authController.login);
 router.post('/request-password-reset', authController.requestPasswordReset);
 router.post("/reset-password/:token", authController.resetPassword);
+router.put("/profile", authorizedMiddleware, uploads.single("profilePicture"), authController.updateProfile);
 
 export default router;

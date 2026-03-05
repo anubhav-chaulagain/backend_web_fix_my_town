@@ -1,6 +1,6 @@
 import { UserService } from "../services/user.service";
-import { CreateAuthorityDTO, CreateUserDTO, LoginUserDTO, UpdateUserDTO } from "../dtos/user.dto";
-import { Request, Response } from "express";
+import { CreateAuthorityDTO, CreateUserDTO, LoginUserDTO, UpdateProfileDTO, UpdateUserDTO } from "../dtos/user.dto";
+import { NextFunction, Request, Response } from "express";
 import z from "zod"
 import { IUser } from "../models/user.model";
 
@@ -168,32 +168,41 @@ export class AuthController {
         }
     }
 
-    // async updateUser(req: Request, res: Response) {
-    //     try {
-    //         const userId = req.user?._id;
-    //         if (!userId) {
-    //             return res.status(400).json(
-    //                 { success: false, message: "User ID not provided" }
-    //             );
-    //         }
-    //         let parsedData = UpdateUserDTO.safeParse(req.body);
-    //         if (!parsedData.success) {
-    //             return res.status(400).json(
-    //                 { success: false, message: z.prettifyError(parsedData.error) }
-    //             )
-    //         }
-    //         if (req.file) { // if file is being uploaded
-    //             parsedData.data.imageUrl = `/uploads/${req.file.filename}`;
-    //         }
-    //         const updatedUser = await userService.updateUser(userId, parsedData.data);
-    //         return res.status(200).json(
-    //             { success: true, message: "User updated successfully", data: updatedUser }
-    //         );
-    //     } catch (error: Error | any) {
-    //         return res.status(error.statusCode ?? 500).json(
-    //             { success: false, message: error.message || "Internal Server Error" }
-    //         );
-    //     }
-    // }
+    async updateProfile(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = (req as any).user._id; // from your auth middleware
+
+            const parsedData = UpdateProfileDTO.safeParse(req.body);
+            if (!parsedData.success) {
+                return res.status(400).json(
+                    { success: false, message: z.prettifyError(parsedData.error) }
+                );
+            }
+
+            const updateData: any = { ...parsedData.data };
+
+            // New image uploaded
+            if (req.file) {
+                updateData.profilePicture = req.file.filename;
+            }
+
+            // Remove existing image
+            if (parsedData.data.removeProfilePicture === 'true') {
+                updateData.profilePicture = null;
+            }
+
+            // Don't store this flag in DB
+            delete updateData.removeProfilePicture;
+
+            const updatedUser = await userService.updateProfile(userId, updateData);
+            return res.status(200).json(
+                { success: true, message: "Profile updated", data: updatedUser }
+            );
+        } catch (error: Error | any) {
+            return res.status(error.statusCode ?? 500).json(
+                { success: false, message: error.message || "Internal Server Error" }
+            );
+        }
+    }
 
 }

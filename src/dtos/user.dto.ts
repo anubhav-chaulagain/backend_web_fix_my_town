@@ -70,3 +70,9 @@ export const AuthorityStatsDTO = UserSchema.pick({
 });
 
 export type AuthorityStatsDTO = z.infer<typeof AuthorityStatsDTO>;
+
+export const UpdateProfileDTO = z.object({
+    fullname: z.string().min(1).optional(),
+    removeProfilePicture: z.string().optional(), // comes as string from FormData
+});
+export type UpdateProfileDTO = z.infer<typeof UpdateProfileDTO>;
